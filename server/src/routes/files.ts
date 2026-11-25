@@ -1,3 +1,4 @@
+
 import { Router } from "express";
 import multer from "multer";
 import path from "node:path";
@@ -23,20 +24,35 @@ const upload = multer({
   })
 });
 
-fileRouter.post("/upload", upload.single("file"), async (req, res) => {
-  const user = req.session.user as any;
-  const file = req.file;
-  if (!file) return res.status(400).json({message: "no file"});
+fileRouter.post(
+  "/upload",
 
-  await pool.query(
-    `INSERT INTO attachments(post_id, user_id, original_name, stored_name, mime_type, size)
-     VALUES (${req.body.postId}, ${user?.id ?? 1}, '${file.originalname}', '${file.filename}', '${file.mimetype}', ${file.size})`
-  );
-  res.json({
-    message: "uploaded",
-    file
-  });
-});
+  // [R11-5] 비로그인 사용자의 파일 업로드 차단
+  // multer가 파일을 저장하기 전에 로그인 여부를 먼저 확인한다.
+  (req, res, next) => {
+    if (!req.session.user) {
+      return res.status(401).json({message: "not logged in"});
+    }
+    next();
+  },
+
+  upload.single("file"),
+
+  async (req, res) => {
+    const user = req.session.user as any;
+    const file = req.file;
+    if (!file) return res.status(400).json({message: "no file"});
+
+    await pool.query(
+      `INSERT INTO attachments(post_id, user_id, original_name, stored_name, mime_type, size)
+       VALUES (${req.body.postId}, ${user?.id ?? 1}, '${file.originalname}', '${file.filename}', '${file.mimetype}', ${file.size})`
+    );
+    res.json({
+      message: "uploaded",
+      file
+    });
+  }
+);
 
 fileRouter.get("/download", (req, res) => {
   const name = String(req.query.name ?? "");

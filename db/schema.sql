@@ -44,11 +44,12 @@ CREATE TABLE attachments (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- [R11-6] 시드 계정 비밀번호를 bcrypt 해시로 저장한다.
 INSERT INTO users(email,password_hash,name,role)
 VALUES
-('admin@school.test', MD5('admin1234'), '관리자', 'ADMIN'),
-('student1@school.test', MD5('student1234'), '학생1', 'USER'),
-('student2@school.test', MD5('student1234'), '학생2', 'USER');
+('admin@school.test', '$2b$10$6sxkZnYci4.1wG0ZLqyyQuWw5nZKyhvXRx2Y6iolJleXy.IA4ByAK', '관리자', 'ADMIN'),
+('student1@school.test', '$2b$10$O/bN6SCYcv/DBwkAlMBiZuJQ9CjMwOPv2fpp1yKUpKdn0dY4G4g7G', '학생1', 'USER'),
+('student2@school.test', '$2b$10$G6QrjhMKhrSH2hJ9Via8I.IYa1Lykrq1RLy.DK.mhSdMuIQuKI6RS', '학생2', 'USER');
 
 INSERT INTO posts(user_id,title,content)
 VALUES

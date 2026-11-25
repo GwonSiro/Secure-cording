@@ -1,3 +1,4 @@
+
 import express from "express";
 import session from "express-session";
 import cookieParser from "cookie-parser";
@@ -15,8 +16,10 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
+// [11-4 보안 수정] 요청 본문 전체를 로그에 출력하지 않는다.
+// 비밀번호, 개인정보 등 민감한 입력값이 터미널에 노출되는 것을 방지한다.
 app.use((req, _res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`, req.body ?? "");
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
